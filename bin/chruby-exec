@@ -5,7 +5,10 @@ source "$chruby_sh"
 
 case "$1" in
 	-h|--help)
-		echo "usage: chruby-exec RUBY [RUBYOPTS] -- COMMAND [ARGS...]"
+		cat <<EOF
+usage: chruby-exec RUBY [RUBYOPTS] -- COMMAND [ARGS...]
+       chruby-exec --auto -- COMMAND [ARGS...]
+EOF
 		exit
 		;;
 	-V|--version)
@@ -15,7 +18,7 @@ case "$1" in
 esac
 
 if (( $# == 0 )); then
-	echo "chruby-exec: RUBY and COMMAND required" >&2
+	echo "chruby-exec: RUBY (or --auto) and COMMAND required" >&2
 	exit 1
 fi
 
@@ -38,7 +41,13 @@ shell_opts=("-l")
 [[ -t 0 ]] && shell_opts+=("-i")
 
 source_command="command -v chruby >/dev/null || source $chruby_sh"
-chruby_command="chruby $(printf "%q " "${argv[@]}")"
+if [[ "${argv[@]}" == "--auto" ]]; then
+    auto_sh="${0%/*}/../share/chruby/auto.sh"
+    source_command+="; command -v chruby_auto >/dev/null || source $auto_sh"
+    chruby_command="chruby_auto"
+else
+    chruby_command="chruby $(printf "%q " "${argv[@]}")"
+fi
 sub_command="$(printf "%q " "$@")"
 command="$source_command; $chruby_command && $sub_command"
 

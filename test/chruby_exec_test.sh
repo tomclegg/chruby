@@ -21,6 +21,13 @@ function test_chruby_exec()
 	assertEquals "did change the ruby" "$test_ruby_version" "$ruby_version"
 }
 
+function test_chruby_exec_auto()
+{
+	local ruby_version=$(cd "$test_project_dir" && chruby-exec --auto -- ruby -e "print RUBY_VERSION")
+
+	assertEquals "did change the ruby" "$test_ruby_version" "$ruby_version"
+}
+
 function test_chruby_exec_with_version()
 {
 	local output=$(chruby-exec --version)
